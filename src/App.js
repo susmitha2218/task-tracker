@@ -1,37 +1,63 @@
-import React, {useState, useEffect, useRef, useMemo, useCallback} from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import TaskList from './TaskList';
-import TaskForm from './TaskForm'; 
+import TaskForm from './TaskForm';
+import CompletedTaskList from './CompletedTaskList';
+import PendingTaskList from './PendingTaskList';
 import './App.css';
 
 function App() {
-  const [tasks, setTasks] = useState( () => {
+  const [tasks, setTasks] = useState(() => {
     const saved = localStorage.getItem('tasks');
-    return saved? JSON.parse(saved) : [];
+    return saved ? JSON.parse(saved) : [];
   });
 
   const [search, setSearch] = useState('');
 
   const filteredTasks = useMemo(() => {
-    return tasks.filter(task => task.toLowerCase().includes(search.toLowerCase()));
-  },[search,tasks]);
+    return Array.isArray(tasks) ?
+      tasks.filter(task =>
+        task.text.toLowerCase().includes(search.toLowerCase()))
+        : [];
+  }, [search, tasks]);
 
-  const addTask = useCallback((task) =>{
-    setTasks(prev => [...prev,task]);
-  },[]);
+  const addTask = useCallback((text) => {
+    const newTask = {
+      id: Date.now(),
+      text,
+      completed: false,
+    };
+    setTasks(prev => [...prev, newTask])
+  }, []);
 
-  useEffect( () => {
+  const deleteTask = useCallback((id) => {
+    setTasks(prev => prev.filter(task => task.id !== id));
+  }, []);
+
+  const toggleComplete = useCallback((id) => {
+    setTasks(prev =>
+      prev.map(task =>
+        task.id === id ? { ...task, completed: !task.completed } : task
+      )
+    );
+  }, []);
+
+  useEffect(() => {
     localStorage.setItem('tasks', JSON.stringify(tasks));
-  },[tasks]);
+  }, [tasks]);
   return (
     <div className="App">
       <h2>📝 Task Tracker</h2>
-      <TaskForm  onAdd ={addTask}/>
+      <TaskForm onAdd={addTask} />
       <input
-      placeholder='search Tasks.........'
-      value = {search}
-      onChange={(e) => setSearch(e.target.value)}
+        placeholder='search Tasks.........'
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
       />
-      <TaskList tasks = {filteredTasks}/>
+      <div style={{ display: 'flex', gap: '20px', justifyContent: 'space-around' }}>
+        <PendingTaskList tasks={filteredTasks} onToggle={toggleComplete} onDelete={deleteTask} />
+        <CompletedTaskList tasks={filteredTasks} onToggle={toggleComplete} onDelete={deleteTask} />
+      </div>
+
     </div>
   );
 }
