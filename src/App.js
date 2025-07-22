@@ -53,11 +53,35 @@ function App() {
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />
-      <div style={{ display: 'flex', gap: '20px', justifyContent: 'space-around' }}>
-        <PendingTaskList tasks={filteredTasks} onToggle={toggleComplete} onDelete={deleteTask} />
-        <CompletedTaskList tasks={filteredTasks} onToggle={toggleComplete} onDelete={deleteTask} />
-      </div>
-
+      {search.trim() !== '' ? (
+  // Show search results only
+  <div>
+    <h3>🔍 Search Results</h3>
+    {filteredTasks.length > 0 ? (
+      <TaskList
+        tasks={filteredTasks}
+        onToggle={toggleComplete}
+        onDelete={deleteTask}
+      />
+    ) : (
+      <p style={{ color: 'red', fontWeight: 'bold' }}>❌ No tasks found</p>
+    )}
+  </div>
+) : (
+  // Show normal layout: pending + completed
+  <div style={{ display: 'flex', gap: '20px', justifyContent: 'space-around' }}>
+    <PendingTaskList
+      tasks={tasks}
+      onToggle={toggleComplete}
+      onDelete={deleteTask}
+    />
+    <CompletedTaskList
+      tasks={tasks}
+      onToggle={toggleComplete}
+      onDelete={deleteTask}
+    />
+  </div>
+)}
     </div>
   );
 }

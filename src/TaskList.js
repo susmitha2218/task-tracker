@@ -14,6 +14,7 @@ function TaskList({ tasks, onDelete, onToggle }) {
                             onClick={() => onToggle(task.id)}
                         >
                         </span>
+                        {task.text}
                         <button onClick={() => onDelete(task.id)}>❌</button>
                     </li>
                 ))}
